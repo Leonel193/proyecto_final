@@ -23,7 +23,7 @@ return new class extends Migration
                 ->constrained('detalle_compras')
                 ->restrictOnDelete();
 
-            $table->string('numero_lote', 100);
+            $table->string('numero_lote', 100)->nullable();
             $table->date('fecha_vencimiento');
             $table->date('fecha_ingreso');
             $table->unsignedInteger('cantidad')->default(0);

@@ -1,4 +1,3 @@
-```php
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -99,16 +98,18 @@
 
 <body>
 
-    <!-- Barra superior -->
     <header class="topbar">
         <span class="fw-bold">Sistema de Gestión de Farmacia</span>
-        <span class="text-white">
-            <i class="bi bi-person-circle me-1"></i>
-            Administración
-        </span>
+        <div class="d-flex align-items-center gap-3">
+
+    <span class="text-white">
+        <i class="bi bi-person-circle me-1"></i>
+        {{ Auth::user()->nombres }}
+    </span>
+
+</div>
     </header>
 
-    <!-- Menú lateral -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <i class="bi bi-capsule"></i>
@@ -126,21 +127,47 @@
                 <i class="bi bi-box-seam-fill"></i> Inventario
             </a>
 
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('proveedores.*') ? 'active' : '' }}"
+            @if(Auth::user()->esPropietaria())
+                href="{{ route('proveedores.index') }}"
+            @else
+                style="color: #999; cursor: not-allowed; opacity: 0.6;"
+                aria-disabled="true"
+                onclick="return false;"
+            @endif>
                 <i class="bi bi-truck"></i> Proveedores
             </a>
 
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('compras.*') ? 'active' : '' }}"
+               href="{{ route('compras.index') }}">
                 <i class="bi bi-bag-plus-fill"></i> Compras
             </a>
 
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('ventas.*') ? 'active' : '' }}"
+               href="{{ route('ventas.index') }}">
                 <i class="bi bi-cart-fill"></i> Ventas
             </a>
 
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('usuarios.*') ? 'active' : '' }}"
+            @if(Auth::user()->esPropietaria())
+                href="{{ route('usuarios.index') }}"
+            @else
+                style="color: #999; cursor: not-allowed; opacity: 0.6;"
+                aria-disabled="true"
+                onclick="return false;"
+            @endif>
                 <i class="bi bi-person-badge-fill"></i> Usuarios
             </a>
+            <form action="{{ route('logout') }}" method="POST" class="mt-3">
+            @csrf
+            
+            <button type="submit" class="nav-link w-100 text-start border-0"
+                    style="background: transparent;">
+                <i class="bi bi-box-arrow-right"></i>
+                Cerrar sesión
+            </button>
+        </form>
+            
         </nav>
     </aside>
 
@@ -149,6 +176,7 @@
         @yield('content')
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
-```

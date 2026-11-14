@@ -17,7 +17,10 @@ class Venta extends Model
         'usuario_id',
         'fecha_venta',
         'total',
-        'metodo_pago',
+        'estado',
+        'motivo_anulacion',
+        'anulada_por',
+        'anulada_at',
     ];
 
     protected function casts(): array
@@ -25,19 +28,27 @@ class Venta extends Model
         return [
             'fecha_venta' => 'date',
             'total' => 'decimal:2',
+            'anulada_at' => 'datetime',
         ];
     }
 
-    // Usuario que registró la venta
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
-    // Productos incluidos en la venta
+    public function anuladaPor(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, 'anulada_por');
+    }
+
     public function detalles(): HasMany
     {
         return $this->hasMany(DetalleVenta::class, 'venta_id');
     }
-}
 
+    public function scopeCompletadas($query)
+    {
+        return $query->where('estado', 'completada');
+    }
+}

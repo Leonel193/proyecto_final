@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
@@ -33,14 +34,29 @@ class Usuario extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function espropietaria(): bool
+    {
+        return $this->rol === 'propietaria';
+    }
 
-    // Compras registradas por el usuario
+    public function puedeAnularVenta(Venta $venta): bool
+    {
+        if ($venta->estado === 'anulada') {
+            return false;
+        }
+        if ($this->espropietaria()) {
+            return true;
+        }
+
+        return $venta->usuario_id === $this->id 
+        && Carbon::parse($venta->fecha_venta)->isToday();
+    }
+
     public function compras(): HasMany
     {
         return $this->hasMany(Compra::class, 'usuario_id');
     }
 
-    // Ventas registradas por el usuario
     public function ventas(): HasMany
     {
         return $this->hasMany(Venta::class, 'usuario_id');

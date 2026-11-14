@@ -36,9 +36,16 @@
                                 <input type="text"
                                        id="nombre"
                                        name="nombre"
-                                       class="form-control"
+                                       class="form-control @error('nombre') is-invalid @enderror"
                                        value="{{ old('nombre', $producto->nombre) }}"
-                                       placeholder="Ej: Paracetamol 500mg">
+                                       placeholder="Ej: Paracetamol 500mg"
+                                       required>
+                                       @error('nombre')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                       @enderror    
+                                       
                             </div>
 
                             <div class="col-md-4">
@@ -56,9 +63,15 @@
                                 <input type="text"
                                        id="presentacion"
                                        name="presentacion"
-                                       class="form-control "
+                                       class="form-control @error('presentacion') is-invalid @enderror"
                                        value="{{ old('presentacion', $producto->presentacion) }}"
-                                       placeholder="Ej: Caja x 20 tabletas">
+                                       placeholder="Ej: Caja x 20 tabletas"
+                                       required>
+                                @error('presentacion')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
 
                             <div class="col-md-4">
@@ -66,9 +79,14 @@
                                 <input type="text"
                                        id="marca"
                                        name="marca"
-                                       class="form-control"
+                                       class="form-control @error('marca') is-invalid @enderror"
                                        value="{{ old('marca', $producto->marca) }}"
                                        placeholder="Ej: Genomma Lab">
+                                @error('marca')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
 
                             <div class="col-md-4">
@@ -78,7 +96,8 @@
                                        name="categoria"
                                        class="form-control @error('categoria') is-invalid @enderror"
                                        value="{{ old('categoria', $producto->categoria) }}"
-                                       placeholder="Ej: Analgésicos">
+                                       placeholder="Ej: Analgésicos"
+                                       required>
                                 @error('categoria')
                                     <div class="invalid-feedback">
                                         {{ $message }}
@@ -105,7 +124,8 @@
                                 <label for="forma_venta" class="form-label">Forma de venta <span class="text-danger">*</span></label>
                                 <select id="forma_venta"
                                         name="forma_venta"
-                                        class="form-select">
+                                        class="form-select"
+                                        required>
                                     <option value="">-- Seleccionar --</option>
                                     <option value="Unidad"    {{ old('forma_venta', $producto->forma_venta) == 'Unidad' ? 'selected' : '' }}>Unidad</option>
                                     <option value="Caja"      {{ old('forma_venta', $producto->forma_venta) == 'Caja' ? 'selected' : '' }}>Caja</option>
@@ -126,7 +146,8 @@
                                            step="0.01"
                                            min="0"
                                            class="form-control @error('precio_compra') is-invalid @enderror"
-                                           value="{{ old('precio_compra', $producto->precio_compra) }}">
+                                           value="{{ old('precio_compra', $producto->precio_compra) }}"
+                                           required>
                                 </div>
                             </div>
 
@@ -140,7 +161,8 @@
                                            step="0.01"
                                            min="0"
                                            class="form-control @error('precio_venta') is-invalid @enderror"
-                                           value="{{ old('precio_venta', $producto->precio_venta) }}">
+                                           value="{{ old('precio_venta', $producto->precio_venta) }}"
+                                           required>
                                 </div>
                             </div>
 
@@ -152,7 +174,13 @@
                                        step="1"
                                        min="0"
                                        class="form-control @error('stock_minimo') is-invalid @enderror"
-                                       value="{{ old('stock_minimo', $producto->stock_minimo) }}">
+                                       value="{{ old('stock_minimo', $producto->stock_minimo) }}"
+                                       required>
+                                       @error('stock_minimo')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                       @enderror
                             </div>
                         </div>
 

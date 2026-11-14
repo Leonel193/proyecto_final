@@ -12,7 +12,8 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        //
+        $usuarios = Usuario::orderBy('nombres')->get();
+        return view('usuarios.index', compact('usuarios'));
     }
 
     /**
@@ -20,7 +21,7 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        //
+        return view('usuarios.create');
     }
 
     /**
@@ -28,7 +29,18 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $datos = $request->validate([
+            'nombres' => 'required|string|max:100',
+            'apellidos' => 'required|string|max:100',
+            'usuario' => 'required|string|max:255|unique:usuarios,usuario',
+            'telefono' => 'nullable|string|max:20',
+            'correo' => 'required|string|email|max:150|unique:usuarios,correo',
+            'rol' => 'required|in:propietaria,vendedor',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+        Usuario::create($datos);
+        return redirect()->route('usuarios.index')
+        ->with('success', 'Usuario creado correctamente.');
     }
 
     /**

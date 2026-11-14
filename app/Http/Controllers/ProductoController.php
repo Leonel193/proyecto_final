@@ -12,7 +12,38 @@ class ProductoController extends Controller
      */
     public function index(request $request)
     {
-        $consulta = Producto::query();
+        $consulta = Producto::query()
+        ->withSum([
+            'lotes as stock_disponible' => function ($query){
+                $query->whereDate(
+                    'fecha_vencimiento',
+                    '>=',
+                    now()->toDateString()
+                );
+            }
+        ], 'cantidad')
+        ->withSum([
+            'lotes as unidades_por_vencer' => function ($query){
+                $query->whereDate(
+                    'fecha_vencimiento',
+                    '>=',
+                    now()->toDateString()
+                )->whereDate(
+                    'fecha_vencimiento',
+                    '<=',
+                    now()->addDays(30)->toDateString()
+                );
+            }
+        ], 'cantidad')
+        ->withSum ([
+            'lotes as unidades_vencidas' => function ($query){
+                $query->whereDate(
+                    'fecha_vencimiento',
+                    '<',
+                    now()->toDateString()
+                );
+            }
+        ], 'cantidad');
 
          if ($request->filled('buscar')) {
             $termino = $request->buscar;
@@ -61,8 +92,54 @@ class ProductoController extends Controller
         });
     }
         $productos = $consulta->get();
+        $productosAlerta = Producto::where('estado', true)
+        ->withSum([
+            'lotes as stock_disponible' => function ($query){
+                
+                $query->whereDate(
+                    'fecha_vencimiento',
+                    '>=',
+                    now()->toDateString()
+                );
+            }
+        ], 'cantidad')
+        ->withSum([
+            'lotes as unidades_por_vencer' => function ($query){
+                $query->whereDate(
+                    'fecha_vencimiento',
+                    '>=',
+                    now()->toDateString()
+                )->whereDate(
+                    'fecha_vencimiento',
+                    '<=',
+                    now()->addDays(30)->toDateString()
+                );
+            }
+        ], 'cantidad')
+        ->withSum ([
+            'lotes as unidades_vencidas' => function ($query){
+                $query->whereDate(
+                    'fecha_vencimiento',
+                    '<',
+                    now()->toDateString()
+                );
+            }
+        ], 'cantidad')
+        ->get();
+
+        $alertasStockBajo = $productosAlerta->filter(function ($producto) {
+            return $producto->stock_disponible <= $producto->stock_minimo;
+        })->count();
+
+        $alertasPorVencer = $productosAlerta->filter(function ($producto) {
+            return ($producto->unidades_por_vencer ?? 0) > 0;
+        })->count();
+
+        $alertasVencidos = $productosAlerta->filter(function ($producto) {
+            return ($producto->unidades_vencidas ?? 0) > 0;
+        })->count();
+
         
-        // Obtener lotes vencidos o próximos a vencer
         $lotesPorVencer = \App\Models\Lote::with('producto')
             ->whereDate('fecha_vencimiento', '<=', now()->addDays(30)->toDateString())
             ->orderBy('fecha_vencimiento')
@@ -70,7 +147,10 @@ class ProductoController extends Controller
 
         return view('productos.index', compact(
             'productos',
-            'lotesPorVencer'
+            'lotesPorVencer',
+            'alertasStockBajo',
+            'alertasPorVencer',
+            'alertasVencidos'
         ));
     }
 

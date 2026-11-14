@@ -20,7 +20,6 @@ return new class extends Migration
 
             $table->date('fecha_venta');
             $table->decimal('total', 10, 2)->default(0);
-            $table->string('metodo_pago', 50)->default('efectivo');
             $table->timestamps();
         });
     }

@@ -4,13 +4,70 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Inventario</h2>
-    <a href="{{ route('productos.create') }}"class="btn btn-primary">
-        Nuevo Producto
-    </a>
+
+    <div class="d-flex gap-2">
+        <a href="{{ route('reportes.inventario') }}" class="btn btn-secondary">
+            <i class="bi bi-file-earmark-pdf me-1"></i>
+            Reporte de inventario
+        </a>
+
+        <a href="{{ route('productos.create') }}" class="btn btn-primary">
+            Nuevo Producto
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-danger h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Stock bajo</h6>
+                    <h3 class="text-danger mb-0">
+                        {{ $alertasStockBajo }}
+                    </h3>
+                    <small class="text-muted">Productos</small>
+                </div>
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-warning h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Próximos a vencer</h6>
+                    <h3 class="text-warning mb-0">
+                        {{ $alertasPorVencer }}
+                    </h3>
+                    <small class="text-muted">Productos</small>
+                </div>
+                <i class="bi bi-calendar-event-fill text-warning fs-1"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-danger h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Productos vencidos</h6>
+                    <h3 class="text-danger mb-0">
+                        {{ $alertasVencidos }}
+                    </h3>
+                    <small class="text-muted">Productos</small>
+                </div>
+                <i class="bi bi-calendar-x-fill text-danger fs-1"></i>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
-{{-- Búsqueda y filtro de inventario --}}
+
 <form action="{{ route('productos.index') }}" method="GET" class="mb-4">
     <div class="row g-3 align-items-end">
 
@@ -85,7 +142,7 @@
     @endif
 
     @if (session('error'))
-    <   div class="alert alert-danger">
+        <div class="alert alert-danger">
             {{ session('error') }}
         </div>
     @endif
@@ -110,7 +167,9 @@
                         <th>Producto</th>
                         <th>Presentación</th>
                         <th>Precio de venta</th>
-                        <th>Stock mínimo</th>
+                        <th>Existencias</th>
+                        <th>Por vencer</th>
+                        <th>Vencidos</th>
                         <th>Estado</th>
                         <th width="200">Acciones</th>
                     </tr>
@@ -126,9 +185,29 @@
                             <td>
                                 Q {{ number_format($producto->precio_venta, 2) }}
                             </td>
+                            <td>
+                                <strong>{{ $producto->stock_disponible ?? 0 }}</strong>
+                                unidades
+                            </td>
 
-                            <td>{{ $producto->stock_minimo }}</td>
-
+                            <td>
+                                @if (($producto->unidades_por_vencer ?? 0)>0)
+                                <span class="badge text-bg-warning">
+                                    {{ $producto->unidades_por_vencer ?? 0 }} unidades
+                                </span>
+                                @else
+                                <span class="text-muted"> 0 unidades</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if (($producto->unidades_vencidas ?? 0)>0)
+                                <span class="badge text-bg-danger">
+                                    {{ $producto->unidades_vencidas ?? 0 }} unidades
+                                </span>
+                                @else
+                                <span class="text-muted"> 0 unidades</span>
+                                @endif
+                            </td>
                             
                             <td>
                                 @php
@@ -179,7 +258,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 No hay productos registrados.
                             </td>
                         </tr>
