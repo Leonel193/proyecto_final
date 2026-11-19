@@ -9,14 +9,13 @@
     ])->values();
 @endphp
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4>Registrar nueva compra</h4>
-
-        <a href="{{ route('compras.index') }}" class="btn btn-secondary">
-            Volver
-        </a>
     </div>
 
     @if ($errors->any())
@@ -35,7 +34,8 @@
         @csrf
 
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header text-white"
+                style="background-color: #2c3e50;">
                 <h5 class="mb-0">Datos de la compra</h5>
             </div>
 
@@ -43,9 +43,22 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Proveedor</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="proveedor_id" class="form-label mb-0">Proveedor</label>
 
-                        <select name="proveedor_id" class="form-select" required>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('proveedores.create') }}"
+                                   class="btn btn-primary">
+                                    Nuevo proveedor
+                                </a>
+                                <button type="button" id="actualizarProveedores"
+                                        class="btn btn-secondary">
+                                    Actualizar lista
+                                </button>
+                            </div>
+                        </div>
+
+                        <select name="proveedor_id" id="proveedor_id" class="form-select" required>
                             <option value="">Seleccionar proveedor</option>
 
                             @foreach ($proveedores as $proveedor)
@@ -74,13 +87,17 @@
         </div>
 
         <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex justify-content-between align-items-center text-white"
+            style="background-color: #2c3e50;">
                 <h5 class="mb-0">Productos y lotes</h5>
 
                 <button type="button" id="agregarProducto" class="btn btn-primary btn-sm">
                     Agregar producto
                 </button>
+
+                
             </div>
+            
 
             <div class="card-body">
 
@@ -91,12 +108,11 @@
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle">
 
-                        <thead class="table-light">
+                        <thead class="table-dark">
                             <tr>
-                                <th>Producto</th>
+                                <th style="min-width: 260px;">Producto</th>
                                 <th style="width: 110px;">Cantidad</th>
-                                <th style="width: 140px;">Precio unitario</th>
-                                <th>Número de lote</th>
+                                <th style="width: 170px;">Precio unitario</th>
                                 <th style="width: 170px;">Vencimiento</th>
                                 <th style="width: 120px;">Subtotal</th>
                                 <th style="width: 100px;">Acción</th>
@@ -120,7 +136,11 @@
         </div>
 
         <div class="text-end mb-4">
-            <button type="submit" id="btnGuardar" class="btn btn-success">
+            <a href="{{route('compras.index')}}" class="btn btn-secondary me-2">
+                Cancelar
+            </a>
+
+            <button type="submit" id="btnGuardar" class="btn btn-primary">
                 Guardar compra
             </button>
         </div>
@@ -151,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const cantidad = parseFloat(fila.querySelector('.cantidad').value) || 0;
             const precio = parseFloat(fila.querySelector('.precio').value) || 0;
 
-            // Se redondea por fila, igual que el servidor
             const subtotal = Math.round(cantidad * precio * 100) / 100;
 
             fila.querySelector('.subtotal').textContent = 'Q ' + subtotal.toFixed(2);
@@ -161,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('totalCompra').textContent = 'Q ' + total.toFixed(2);
     }
 
-    function agregarFila(datos) {
+    function agregarFila(datos, enfocar) {
         datos = datos || {};
         const i = contador++;
 
@@ -181,18 +200,13 @@ document.addEventListener('DOMContentLoaded', function () {
             </td>
 
             <td>
+                <div class="input-group">
+                    <span class="input-group-text">Q</span>
                 <input type="number"
                     name="productos[${i}][precio_unitario]"
                     class="form-control precio"
                     min="0.01" step="0.01" required>
-            </td>
-
-            <td>
-                <input type="text"
-                    name="productos[${i}][numero_lote]"
-                    class="form-control lote"
-                    maxlength="100"
-                    placeholder="Opcional">
+                    </div>
             </td>
 
             <td>
@@ -223,33 +237,43 @@ document.addEventListener('DOMContentLoaded', function () {
         select.value = datos.producto_id ?? '';
         fila.querySelector('.cantidad').value = datos.cantidad ?? '';
         fila.querySelector('.precio').value = datos.precio_unitario ?? '';
-        fila.querySelector('.lote').value = datos.numero_lote ?? '';
         fila.querySelector('.vencimiento').value = datos.fecha_vencimiento ?? '';
 
         fila.querySelector('.cantidad').addEventListener('input', calcularTotal);
         fila.querySelector('.precio').addEventListener('input', calcularTotal);
 
+        listaProductos.appendChild(fila);
+        const buscador = new TomSelect(select,{
+            placeholder: 'Buscar producto...',
+            dropdownParent: 'body',
+            maxOptions: null,
+        });
+
         fila.querySelector('.eliminarProducto').addEventListener('click', function () {
+            buscador.destroy();
             fila.remove();
             calcularTotal();
         });
 
-        listaProductos.appendChild(fila);
         aviso.classList.add('d-none');
         calcularTotal();
+        if (enfocar) {
+            buscador.focus();
+        }
     }
 
     botonAgregar.addEventListener('click', function () {
-        agregarFila();
+        agregarFila({}, true);
     });
 
-    // Reconstruir las filas anteriores o empezar con una fila vacía
     const anteriores = Object.values(filasAnteriores);
 
     if (anteriores.length > 0) {
-        anteriores.forEach(agregarFila);
+        anteriores.forEach(function(datos){
+            agregarFila(datos, false);
+        });
     } else {
-        agregarFila();
+        agregarFila({}, false);
     }
 
     form.addEventListener('submit', function (e) {
@@ -262,6 +286,30 @@ document.addEventListener('DOMContentLoaded', function () {
         // Evitar doble envío
         btnGuardar.disabled = true;
         btnGuardar.textContent = 'Guardando...';
+    });
+    const btnActualizar = document.getElementById('actualizarProveedores');
+
+    btnActualizar.addEventListener('click', async function () {
+        const select = document.getElementById('proveedor_id');
+        const seleccionado = select.value;
+
+        btnActualizar.disabled = true;
+
+        try {
+            const respuesta = await fetch(window.location.href);
+            const html = await respuesta.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const nuevo = doc.querySelector('#proveedor_id');
+
+            if (nuevo) {
+                select.innerHTML = nuevo.innerHTML;
+                select.value = seleccionado;
+            }
+        } catch (error) {
+            console.error('No se pudo actualizar la lista de proveedores', error);
+        } finally {
+            btnActualizar.disabled = false;
+        }
     });
 });
 </script>

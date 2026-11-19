@@ -2,7 +2,8 @@
 @section('content')
 
 <div class="card shadow">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header text-white"
+        style="background-color: #2c3e50;">
         <h4>Nuevo Producto</h4>
     </div>
 
@@ -32,7 +33,7 @@
                         @error('nombre')
                             <div class="invalid-feedback">
                                 {{ $message }}
-                            </div>
+                            </div> 
                         @enderror
                     </div>
 
@@ -69,7 +70,7 @@
                         <select name="forma_venta" id="forma_venta"
                             class="form-select @error('forma_venta') is-invalid @enderror" required>
                             <option value="">Selecciona una opción</option>
-                            @foreach (['Unidad', 'Blíster', 'Caja', 'Frasco', 'Sobre', 'Otro'] as $forma)
+                            @foreach (\App\Models\Producto::FORMAS_VENTA as $forma)
                                 <option value="{{ $forma }}"
                                     @selected(old('forma_venta') == $forma)>
                                     {{ $forma }}
@@ -111,35 +112,6 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="precio_compra" class="form-label">
-                            Precio de compra (Q) *
-                        </label>
-                        <input type="number" name="precio_compra"
-                            id="precio_compra" class="form-control @error('precio_compra') is-invalid @enderror "
-                            step="0.01" min="0.01"
-                            value="{{ old('precio_compra') }}" required>
-                        @error('precio_compra')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="precio_venta" class="form-label">
-                            Precio de venta (Q) *
-                        </label>
-                        <input type="number" name="precio_venta"
-                            id="precio_venta" class="form-control @error('precio_venta') is-invalid @enderror"
-                            step="0.01" min="0.01"
-                            value="{{ old('precio_venta') }}" required>
-                        @error('precio_venta')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
 
                     <div class="row">
 
@@ -149,7 +121,7 @@
                             </label>
                             <input type="number" name="stock_minimo"
                                 id="stock_minimo" class="form-control @error('stock_minimo') is-invalid @enderror   "
-                                min="0" value="{{ old('stock_minimo', 0) }}"
+                                min="0" value="{{ old('stock_minimo') }}"
                                 required>
                         </div>
 
@@ -180,7 +152,7 @@
 
                 </div>
 
-                <button class="btn btn-success">
+                <button class="btn btn-primary">
                     Guardar Producto
                 </button>
 

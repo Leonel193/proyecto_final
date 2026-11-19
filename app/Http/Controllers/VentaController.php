@@ -22,7 +22,7 @@ class VentaController extends Controller
         $ventas = Venta::with('usuario')
             ->orderByDesc('fecha_venta')
             ->orderByDesc('id')
-            ->paginate(15);
+            ->paginate(10);
 
         return view('ventas.index', compact('ventas'));
     }
@@ -37,6 +37,7 @@ class VentaController extends Controller
             ->where('cantidad', '>', 0);
 
         $productos = Producto::where('estado', true)
+            ->where('precio_venta', '>', 0)
             ->whereHas('lotes', $vigentes)
             ->withSum(['lotes as stock_vigente' => $vigentes], 'cantidad')
             ->with(['lotes' => fn ($query) => $vigentes($query)
@@ -94,6 +95,12 @@ class VentaController extends Controller
                     if (!$producto->estado) {
                         throw ValidationException::withMessages([
                             'productos' => 'El producto ' . $producto->nombre . ' está inactivo.',
+                        ]);
+                    }
+
+                    if ($producto->precio_venta <= 0) {
+                        throw ValidationException::WithMessages([
+                            'productos' => 'El producto ' . $producto->nombre . 'aún no tiene precio de venta.',
                         ]);
                     }
 

@@ -12,10 +12,15 @@
             </p>
         </div>
 
-        <button onclick="window.print()" class="btn btn-primary">
-            <i class="bi bi-printer me-1"></i>
-            Imprimir / Guardar PDF
-        </button>
+        <div class="d-flex gap-2">
+            <a href="{{route('productos.index')}}" class="btn btn-secondary">
+                Volver
+            </a>
+
+            <button onclick="window.print()" class="btn btn-primary">
+                Imprimir / Guardar PDF
+            </button>
+        </div>
     </div>
 
     <div class="card shadow-sm border-0">
@@ -34,7 +39,6 @@
 
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Producto</th>
                             <th>Presentación</th>
                             <th>Precio de venta</th>
@@ -47,12 +51,15 @@
                     <tbody>
                         @forelse ($productos as $producto)
                             <tr>
-                                <td>{{ $producto->id }}</td>
                                 <td>{{ $producto->nombre }}</td>
                                 <td>{{ $producto->presentacion }}</td>
 
                                 <td>
+                                    @if ($producto->precio_venta > 0)
                                     Q {{ number_format($producto->precio_venta, 2) }}
+                                    @else
+                                    Sin precio
+                                    @endif
                                 </td>
 
                                 <td>
@@ -69,7 +76,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">
+                                <td colspan="6" class="text-center text-muted">
                                     No hay productos registrados.
                                 </td>
                             </tr>

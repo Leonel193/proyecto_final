@@ -4,16 +4,11 @@
 @section('content')
 
 <div class="container-fluid">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Registrar usuario</h3>
-
-        <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">
-            Volver
-        </a>
-    </div>
-
     <div class="card shadow-sm">
+        <div class="card-header text-white"
+        style="background-color: #2c3e50;">
+        <h4>Registrar usuario</h4>
+    </div>
         <div class="card-body">
 
             @if ($errors->any())
@@ -93,6 +88,9 @@
                     <button type="submit" class="btn btn-primary">
                         Guardar usuario
                     </button>
+                     <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">
+                        Volver
+                    </a>
                 </div>
 
             </form>

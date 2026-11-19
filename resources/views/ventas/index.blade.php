@@ -9,12 +9,11 @@
 
         <div class="d-flex gap-2">
             <a href="{{ route('reportes.ventas') }}" class="btn btn-secondary">
-                <i class="bi bi-file-earmark-pdf me-1"></i>
                 Reporte de ventas
             </a>
 
             <a href="{{ route('ventas.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Nueva venta
+               Nueva venta
             </a>
         </div>
     </div>
@@ -43,13 +42,13 @@
         </div>
     @enderror
 
-    <div class="card shadow-sm">
+    <div class="card shadow">
         <div class="card-body">
-
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover table-bordered align-middle mb-0">
 
-                    <thead class="table-light">
+                    <thead class="table-dark"
+                        style="--bs-table-bg: #2c3e50; --bs-table-color: #ffffff;">
                         <tr>
                             <th>Código</th>
                             <th>Fecha</th>
@@ -65,7 +64,7 @@
                             @php $anulada = $venta->estado === 'anulada'; @endphp
 
                             <tr class="{{ $anulada ? 'table-secondary' : '' }}">
-                                <td>{{ $venta->id }}</td>
+                                <td>{{ $venta->numero }}</td>
 
                                 <td>
                                     {{ \Carbon\Carbon::parse($venta->fecha_venta)->format('d/m/Y') }}
@@ -102,7 +101,7 @@
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalAnular"
                                                 data-url="{{ route('ventas.anular', $venta) }}"
-                                                data-venta="{{ $venta->id }}">
+                                                data-venta="{{ $venta->numero }}">
                                                 Anular
                                             </button>
                                         @endif

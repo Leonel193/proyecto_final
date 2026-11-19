@@ -4,131 +4,44 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProductoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(request $request)
+    public function index()
     {
-        $consulta = Producto::query()
-        ->withSum([
-            'lotes as stock_disponible' => function ($query){
-                $query->whereDate(
-                    'fecha_vencimiento',
-                    '>=',
-                    now()->toDateString()
-                );
-            }
-        ], 'cantidad')
-        ->withSum([
-            'lotes as unidades_por_vencer' => function ($query){
-                $query->whereDate(
-                    'fecha_vencimiento',
-                    '>=',
-                    now()->toDateString()
-                )->whereDate(
-                    'fecha_vencimiento',
-                    '<=',
-                    now()->addDays(30)->toDateString()
-                );
-            }
-        ], 'cantidad')
-        ->withSum ([
-            'lotes as unidades_vencidas' => function ($query){
-                $query->whereDate(
-                    'fecha_vencimiento',
-                    '<',
-                    now()->toDateString()
-                );
-            }
-        ], 'cantidad');
+        $hoy = now()->toDateString();
+        $en30Dias = now()->addDays(30)->toDateString();
 
-         if ($request->filled('buscar')) {
-            $termino = $request->buscar;
+        $sumas = [
+            'lotes as stock_disponible' => fn ($query) => $query
+                ->whereDate('fecha_vencimiento', '>=', $hoy),
 
-            $consulta->where(function ($query) use ($termino) {
-                $query->where('nombre', 'like', "%{$termino}%")
-                    ->orWhere('marca', 'like', "%{$termino}%")
-                    ->orWhere('principio_activo', 'like', "%{$termino}%");
-            });
-        }   
+            'lotes as unidades_por_vencer' => fn ($query) => $query
+                ->whereDate('fecha_vencimiento', '>=', $hoy)
+                ->whereDate('fecha_vencimiento', '<=', $en30Dias),
 
-         if ($request->estado_inventario === 'disponible') {
-        $consulta->where('estado', true)
-            ->whereRaw('
-                (
-                    SELECT COALESCE(SUM(l.cantidad), 0)
-                    FROM lotes l
-                    WHERE l.producto_id = productos.id
-                      AND l.fecha_vencimiento >= ?
-                ) > productos.stock_minimo
-            ', [now()->toDateString()]);
-    }
+            'lotes as unidades_vencidas' => fn ($query) => $query
+                ->whereDate('fecha_vencimiento', '<', $hoy),
+        ];
 
-    if ($request->estado_inventario === 'stock_bajo') {
-        $consulta->where('estado', true)
-            ->whereRaw('
-                (
-                    SELECT COALESCE(SUM(l.cantidad), 0)
-                    FROM lotes l
-                    WHERE l.producto_id = productos.id
-                      AND l.fecha_vencimiento >= ?
-                ) <= productos.stock_minimo
-            ', [now()->toDateString()]);
-    }
-        if ($request->estado_inventario === 'proximo_vencer') {
-        $consulta->whereHas('lotes', function ($query) {
-            $query->whereDate(
-                'fecha_vencimiento',
-                '>=',
-                now()->toDateString()
-            )->whereDate(
-                'fecha_vencimiento',
-                '<=',
-                now()->addDays(30)->toDateString()
-            );
-        });
-    }
-        $productos = $consulta->get();
+        $productos = Producto::withSum($sumas, 'cantidad')
+            ->orderBy('nombre')
+            ->get();
+
         $productosAlerta = Producto::where('estado', true)
-        ->withSum([
-            'lotes as stock_disponible' => function ($query){
-                
-                $query->whereDate(
-                    'fecha_vencimiento',
-                    '>=',
-                    now()->toDateString()
-                );
-            }
-        ], 'cantidad')
-        ->withSum([
-            'lotes as unidades_por_vencer' => function ($query){
-                $query->whereDate(
-                    'fecha_vencimiento',
-                    '>=',
-                    now()->toDateString()
-                )->whereDate(
-                    'fecha_vencimiento',
-                    '<=',
-                    now()->addDays(30)->toDateString()
-                );
-            }
-        ], 'cantidad')
-        ->withSum ([
-            'lotes as unidades_vencidas' => function ($query){
-                $query->whereDate(
-                    'fecha_vencimiento',
-                    '<',
-                    now()->toDateString()
-                );
-            }
-        ], 'cantidad')
-        ->get();
+            ->withSum($sumas, 'cantidad')
+            ->get();
+
+        $alertasDisponibles = $productosAlerta->filter(function ($producto) {
+            return ($producto->stock_disponible ?? 0) > 0;
+        })->count();
 
         $alertasStockBajo = $productosAlerta->filter(function ($producto) {
-            return $producto->stock_disponible <= $producto->stock_minimo;
+            return ($producto->stock_disponible ?? 0) <= $producto->stock_minimo;
         })->count();
 
         $alertasPorVencer = $productosAlerta->filter(function ($producto) {
@@ -139,18 +52,17 @@ class ProductoController extends Controller
             return ($producto->unidades_vencidas ?? 0) > 0;
         })->count();
 
-        
-        $lotesPorVencer = \App\Models\Lote::with('producto')
-            ->whereDate('fecha_vencimiento', '<=', now()->addDays(30)->toDateString())
-            ->orderBy('fecha_vencimiento')
-            ->get();
+        $alertasSinPrecio = $productosAlerta->filter(function ($producto) {
+            return $producto->precio_venta <= 0;
+        })->count();
 
         return view('productos.index', compact(
             'productos',
-            'lotesPorVencer',
+            'alertasDisponibles',
             'alertasStockBajo',
             'alertasPorVencer',
-            'alertasVencidos'
+            'alertasVencidos',
+            'alertasSinPrecio'
         ));
     }
 
@@ -169,16 +81,14 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         $datos = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'presentacion' => 'required|string|max:255',
-            'marca' => 'nullable|string|max:255',
-            'forma_venta' => 'nullable|string|max:100',
-            'principio_activo' => 'nullable|string|max:255',
+            'nombre' => 'required|string|max:150',
+            'presentacion' => 'required|string|max:100',
+            'marca' => 'nullable|string|max:100',
+            'forma_venta' => ['required', Rule::in(Producto::FORMAS_VENTA)],
+            'principio_activo' => 'nullable|string|max:150',
             'codigo_barra' => 'nullable|string|max:100|unique:productos,codigo_barra',
-            'precio_compra' => 'required|numeric|min:0',
-            'precio_venta' => 'required|numeric|min:0',
-            'stock_minimo' => 'required|integer|min:0',
-            'categoria' => 'nullable|string|max:255',
+            'stock_minimo' => 'required|integer|min:0|max:100000',
+            'categoria' => 'required|string|max:100',
             'estado' => 'required|boolean',
         ]);
 
@@ -212,19 +122,17 @@ class ProductoController extends Controller
     public function update(Request $request, Producto $producto)
     {
         $datos = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'presentacion' => 'required|string|max:255',
-            'marca' => 'nullable|string|max:255',
-            'forma_venta' => 'nullable|string|max:100',
-            'principio_activo' => 'nullable|string|max:255',
+            'nombre' => 'required|string|max:150',
+            'presentacion' => 'required|string|max:100',
+            'marca' => 'nullable|string|max:100',
+            'forma_venta' => ['required', Rule::in(Producto::FORMAS_VENTA)],
+            'principio_activo' => 'nullable|string|max:150',
             'codigo_barra' => 'nullable|string|max:100|unique:productos,codigo_barra,' . $producto->id,
-            'precio_compra' => 'required|numeric|min:0',
-            'precio_venta' => 'required|numeric|min:0',
-            'stock_minimo' => 'required|integer|min:0',
-            'categoria' => 'nullable|string|max:255',
+            'precio_venta'=> 'required|numeric|min:0|max:99999999.99',
+            'stock_minimo' => 'required|integer|min:0|max:100000',
+            'categoria' => 'required|string|max:100',
             'estado' => 'required|boolean',
         ]);
-
         $producto->update($datos);
 
         return redirect()

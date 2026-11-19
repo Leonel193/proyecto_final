@@ -12,11 +12,34 @@
             </p>
         </div>
 
+        <div class="d-flex gap-2">
+            <a href="{{route('ventas.index')}}" class="btn btn-secondary">
+                Volver
+            </a>
+
         <button onclick="window.print()" class="btn btn-primary">
-            <i class="bi bi-printer me-1"></i>
             Imprimir / Guardar PDF
         </button>
     </div>
+</div>
+
+    <form method="GET" action="{{ url()->current() }}" class="row g-2 align-items-end mb-4 d-print-none">
+        <div class="col-auto">
+            <label for="desde" class="form-label mb-1">Desde</label>
+            <input type="date" id="desde" name="desde" class="form-control" value="{{ $desde }}">
+        </div>
+        <div class="col-auto">
+            <label for="hasta" class="form-label mb-1">Hasta</label>
+            <input type="date" id="hasta" name="hasta" class="form-control" value="{{ $hasta }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Generar reporte</button>
+        </div>
+    </form>
+
+    @if ($errors->any())
+        <div class="alert alert-danger d-print-none">{{ $errors->first() }}</div>
+    @endif
 
     <div class="card shadow-sm border-0">
         <div class="card-body">
@@ -38,7 +61,6 @@
                             <th>Fecha</th>
                             <th>Usuario</th>
                             <th>Productos</th>
-                            <th>Método de pago</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -46,7 +68,7 @@
                     <tbody>
                         @forelse ($ventas as $venta)
                             <tr>
-                                <td>{{ $venta->id }}</td>
+                                <td>{{ $venta->numero }}</td>
 
                                 <td>
                                     {{ $venta->fecha_venta->format('d/m/Y') }}
@@ -67,7 +89,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">
+                                <td colspan="5" class="text-center text-muted">
                                     No hay ventas registradas.
                                 </td>
                             </tr>

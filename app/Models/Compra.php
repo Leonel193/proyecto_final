@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Compra extends Model
 {
@@ -26,6 +27,11 @@ class Compra extends Model
             'fecha_compra' => 'date',
             'total' => 'decimal:2',
         ];
+    }
+    
+    protected function numero():Attribute
+    {
+        return Attribute:: get(fn ()=> str_pad($this->id, 6, '0', STR_PAD_LEFT));
     }
 
     // Usuario que registró la compra

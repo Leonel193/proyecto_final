@@ -21,6 +21,7 @@ class Usuario extends Authenticatable
         'correo',
         'password',
         'rol',
+        'activo',
     ];
 
     protected $hidden = [
@@ -32,6 +33,7 @@ class Usuario extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'activo' => 'boolean'
         ];
     }
     public function espropietaria(): bool

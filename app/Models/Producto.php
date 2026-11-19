@@ -10,6 +10,12 @@ class Producto extends Model
 {
     use HasFactory;
 
+    public const FORMAS_VENTA=[
+        'Venta libre',
+        'Con receta',
+        'Receta retenida',
+    ];
+
     protected $table = 'productos';
 
     protected $fillable = [

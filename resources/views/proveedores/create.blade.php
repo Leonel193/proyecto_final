@@ -1,16 +1,9 @@
-
 @extends('layouts.app')
 
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Registrar proveedor</h2>
-
-    <a href="{{ route('proveedores.index') }}"
-       class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>
-        Volver
-    </a>
 </div>
 
 <div class="card shadow">
@@ -113,19 +106,14 @@
 
             <div class="mt-4 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save me-1"></i>
                     Guardar proveedor
                 </button>
 
                 <a href="{{ route('proveedores.index') }}"
-                   class="btn btn-outline-secondary">
+                   class="btn btn-secondary">
                     Cancelar
                 </a>
             </div>
-
-            <p class="text-muted mt-3 mb-0">
-                * Campos obligatorios.
-            </p>
 
         </form>
 

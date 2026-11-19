@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('correo', 150)->unique();
             $table->string('password');
             $table->string('rol', 30);
+            $table->boolean('activo')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

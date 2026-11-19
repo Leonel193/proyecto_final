@@ -7,6 +7,7 @@ use App\Models\Proveedor;
 use App\Models\Producto;
 use App\Models\Usuario;
 use App\Models\Lote;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,48 +55,14 @@ class CompraController extends Controller
             'proveedor_id' => 'required|exists:proveedores,id',
             'fecha_compra' => 'required|date|before_or_equal:today',
 
-            'productos' => [
-                'required',
-                'array',
-                'min:1',
-                function ($attribute, $productos, $fail) {
-                    $vistos = [];
-
-                    foreach ($productos as $p) {
-                        $numeroLote = trim($p['numero_lote'] ?? '');
-
-                        if ($numeroLote === '') {
-                            continue;
-                        }
-
-                        $productoId = $p['producto_id'] ?? 0;
-                        $clave = $productoId . '-' . strtolower($numeroLote);
-
-                        if (in_array($clave, $vistos, true)) {
-                            $fail('No puedes repetir el mismo número de lote para un producto dentro de la compra.');
-                            return;
-                        }
-                        $vistos[] = $clave;
-
-                        $existe = Lote::where('producto_id', $productoId)
-                            ->where('numero_lote', $numeroLote)
-                            ->exists();
-
-                        if ($existe) {
-                            $fail("El lote {$numeroLote} ya está registrado para ese producto.");
-                            return;
-                        }
-                    }
-                },
-            ],
+            'productos' => 'required|array|min:1',
 
             'productos.*.producto_id' => [
                 'required',
                 Rule::exists('productos', 'id')->where('estado', true),
             ],
-            'productos.*.cantidad' => 'required|integer|min:1',
-            'productos.*.precio_unitario' => 'required|numeric|min:0.01',
-            'productos.*.numero_lote' => 'nullable|string|max:100',
+            'productos.*.cantidad' => 'required|integer|min:1|max:10000',
+            'productos.*.precio_unitario' => 'required|numeric|min:0.01|max:9999.99',
             'productos.*.fecha_vencimiento' => 'required|date|after:today',
         ]);
 
@@ -127,11 +94,18 @@ class CompraController extends Controller
 
                 $detalle->lotes()->create([
                     'producto_id' => $p['producto_id'],
-                    'numero_lote' => $p['numero_lote'] ?? null,
+                    'numero_lote' => $this->generarNumeroLote(
+                        (int) $p['producto_id'],
+                        $request->fecha_compra
+                    ),
+
                     'fecha_vencimiento' => $p['fecha_vencimiento'],
                     'fecha_ingreso' => $request->fecha_compra,
                     'cantidad' => $p['cantidad'],
                 ]);
+
+                Producto::where('id', $p['producto_id'])
+                ->update(['precio_compra' =>$p['precio_unitario']]);
             }
         });
 
@@ -139,6 +113,25 @@ class CompraController extends Controller
             ->route('compras.index')
             ->with('success', 'Compra registrada correctamente.');
     }
+
+    private function generarNumeroLote(int $productoId, string $fechaCompra): string
+    {
+        $prefijo = 'L-' . Carbon::parse($fechaCompra)->format('Ymd') . '-';
+
+        $ultimo = Lote::where('producto_id', $productoId)
+            ->where('numero_lote', 'like', $prefijo . '%')
+            ->orderByRaw('LENGTH(numero_lote) DESC')
+            ->orderByDesc('numero_lote')
+            ->lockForUpdate()
+            ->value('numero_lote');
+
+        $siguiente = $ultimo
+            ? ((int) substr($ultimo, strlen($prefijo))) + 1
+            : 1;
+
+        return $prefijo . str_pad((string) $siguiente, 3, '0', STR_PAD_LEFT);
+    }
+
 
     /**
      * Display the specified resource.

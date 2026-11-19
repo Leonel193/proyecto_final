@@ -8,15 +8,38 @@
         <div>
             <h3>Reporte de compras</h3>
             <p class="text-muted mb-0">
-                Historial de compras realizadas a proveedores.
+                Historial de compras realizadas.
             </p>
         </div>
 
+        <div class="d-flex gap-2">
+            <a href="{{route('compras.index')}}" class="btn btn-secondary">
+                Volver
+            </a>
+
         <button onclick="window.print()" class="btn btn-primary">
-            <i class="bi bi-printer me-1"></i>
             Imprimir / Guardar PDF
         </button>
+        </div>
     </div>
+
+    <form method="GET" action="{{ url()->current() }}" class="row g-2 align-items-end mb-4 d-print-none">
+        <div class="col-auto">
+            <label for="desde" class="form-label mb-1">Desde</label>
+            <input type="date" id="desde" name="desde" class="form-control" value="{{ $desde }}">
+        </div>
+        <div class="col-auto">
+            <label for="hasta" class="form-label mb-1">Hasta</label>
+            <input type="date" id="hasta" name="hasta" class="form-control" value="{{ $hasta }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Generar reporte</button>
+        </div>
+    </form>
+
+    @if ($errors->any())
+        <div class="alert alert-danger d-print-none">{{ $errors->first() }}</div>
+    @endif
 
     <div class="card shadow-sm border-0">
         <div class="card-body">
@@ -45,7 +68,7 @@
                     <tbody>
                         @forelse ($compras as $compra)
                             <tr>
-                                <td>{{ $compra->id }}</td>
+                                <td>{{ $compra->numero }}</td>
 
                                 <td>
                                     {{ $compra->fecha_compra->format('d/m/Y') }}

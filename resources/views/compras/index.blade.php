@@ -9,12 +9,11 @@
 
     <div class="d-flex gap-2">
         <a href="{{ route('reportes.compras') }}" class="btn btn-secondary">
-            <i class="bi bi-file-earmark-pdf me-1"></i>
             Reporte de compras
         </a>
 
         <a href="{{ route('compras.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Nueva compra
+            Nueva compra
         </a>
     </div>
 </div>
@@ -31,15 +30,14 @@
         </div>
     @endif
 
-    <div class="card">
+    <div class="card shadow">
         <div class="card-body">
-
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-
-                    <thead class="table-light">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                    <thead class="table-dark"
+                        style="--bs-table-bg: #2c3e50; --bs-table-color: #ffffff;">
                         <tr>
-                            <th>ID</th>
+                            <th>No.</th>
                             <th>Fecha</th>
                             <th>Proveedor</th>
                             <th>Usuario</th>
@@ -52,7 +50,7 @@
 
                         @forelse($compras as $compra)
                             <tr>
-                                <td>{{ $compra->id }}</td>
+                                <td>{{ $compra->numero }}</td>
 
                                 <td>
                                     {{ $compra->fecha_compra->format('d/m/Y') }}

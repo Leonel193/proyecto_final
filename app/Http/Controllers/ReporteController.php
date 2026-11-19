@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Compra;
 use App\Models\Producto;
 use App\Models\Venta;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class ReporteController extends Controller
 {
@@ -49,33 +51,59 @@ class ReporteController extends Controller
     /**
      * Historial de compras.
      */
-    public function compras()
-    {
+    public function compras(Request $request)
+    {   
+        [$desde, $hasta] = $this->rangoFechas($request);
+
         $compras = Compra::with(['proveedor', 'usuario'])
+            ->WhereDate('fecha_compra', '>=', $desde)
+            ->WhereDate('fecha_compra', '<=', $hasta)
             ->orderByDesc('fecha_compra')
             ->orderByDesc('id')
             ->get();
 
-        return view('reportes.compras', compact('compras'));
+        return view('reportes.compras', compact('compras', 'desde', 'hasta'));
     }
 
     /**
      * Ventas: solo las completadas, para que los totales no incluyan anulaciones.
      * Las anuladas se resumen aparte por si la vista quiere mostrarlas.
      */
-    public function ventas()
+    public function ventas(Request $request)
     {
+        [$desde, $hasta] = $this->rangoFechas($request);
+
         $ventas = Venta::completadas()
             ->with(['usuario', 'detalles'])
             ->withCount('detalles')
+            ->whereDate('fecha_venta', '>=', $desde)
+            ->whereDate('fecha_venta', '<=', $hasta)
             ->orderByDesc('fecha_venta')
             ->orderByDesc('id')
             ->get();
 
         $totalVentas = $ventas->sum('total');
 
-        $ventasAnuladas = Venta::where('estado', 'anulada')->count();
+        $ventasAnuladas = Venta::where('estado', 'anulada')
+            ->whereDate('fecha_venta', '>=', $desde)
+            ->whereDate('fecha_venta', '<=', $hasta)
+            ->count();
 
-        return view('reportes.ventas', compact('ventas', 'totalVentas', 'ventasAnuladas'));
+        return view('reportes.ventas', compact(
+            'ventas', 'totalVentas', 'ventasAnuladas', 'desde', 'hasta'
+        ));
+    }
+
+    private function rangoFechas(Request $request): array
+    {
+        $request->validate([
+            'desde' => ['nullable', 'date'],
+            'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
+        ]);
+
+        $hasta = $request->input('hasta') ?: now()->toDateString();
+        $desde = $request->input('desde') ?: Carbon::parse($hasta)->startOfMonth()->toDateString();
+        
+        return [$desde, $hasta];
     }
 }

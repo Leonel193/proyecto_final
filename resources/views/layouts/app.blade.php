@@ -72,6 +72,10 @@
             background-color: #2876a5;
             color: white;
         }
+        .sidebar form button.nav_link:hover{
+            color: #0d6efd !important;
+            background-color transparent;
+        }
 
         .main-content {
             margin-left: 240px;
@@ -92,6 +96,16 @@
             .topbar {
                 padding: 0 12px;
             }
+        }
+        /* Efecto hover para Cerrar sesión */
+        .sidebar form button.nav-link {
+            color: #e8f0f5 !important;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar form button.nav-link:hover {
+            background-color: #2876a5 !important;
+            color: white !important;
         }
     </style>
 </head>

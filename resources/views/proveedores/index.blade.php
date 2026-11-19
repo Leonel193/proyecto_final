@@ -7,12 +7,10 @@
     <h2>Proveedores</h2>
 
     <a href="{{ route('proveedores.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i>
         Nuevo Proveedor
     </a>
 </div>
 
-{{-- Búsqueda de proveedores --}}
 <form action="{{ route('proveedores.index') }}" method="GET" class="mb-4">
     <div class="row g-3 align-items-end">
 
@@ -33,12 +31,11 @@
 
         <div class="col-md-3">
             <button type="submit" class="btn btn-primary">
-                <i class="bi bi-search me-1"></i>
                 Buscar
             </button>
 
             <a href="{{ route('proveedores.index') }}"
-               class="btn btn-outline-secondary">
+               class="btn btn-secondary">
                 Limpiar
             </a>
         </div>
@@ -72,26 +69,23 @@
 {{-- Tabla de proveedores --}}
 <div class="card shadow">
     <div class="card-body">
-
         <div class="table-responsive">
-            <table class="table table-hover table-bordered align-middle">
+            <table class="table table-hover table-bordered align-middle mb-0">
 
                 <thead class="table-dark"
                     style="--bs-table-bg: #2c3e50; --bs-table-color: #ffffff;">
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Teléfono</th>
                         <th>Tipo de producto</th>
                         <th>Fecha de visita</th>
-                        <th width="200">Acciones</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @forelse ($proveedores as $proveedor)
                         <tr>
-                            <td>{{ $proveedor->id }}</td>
                             <td>{{ $proveedor->nombre }}</td>
                             <td>{{ $proveedor->telefono ?: 'No registrado' }}</td>
                             <td>{{ $proveedor->tipo_producto }}</td>
@@ -130,7 +124,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="5" class="text-center text-muted py-4">
                                 No hay proveedores registrados.
                             </td>
                         </tr>

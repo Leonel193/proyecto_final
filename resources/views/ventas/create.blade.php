@@ -2,6 +2,14 @@
 
 @section('content')
 
+<style>
+    .sticky-resumen {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+    }
+</style>
+
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -12,7 +20,7 @@
         </a>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow">
         <div class="card-body">
 
             @if ($errors->any())
@@ -30,39 +38,35 @@
             @if ($productos->isEmpty())
 
                 <div class="alert alert-info mb-0">
-                    No hay productos con existencias vigentes para vender.
+                    No hay productos con existencias vigentes y precio de venta para vender.
                 </div>
 
             @else
 
                 <form id="form-venta" action="{{ route('ventas.store') }}" method="POST">
                     @csrf
-
-                    <h5 class="mb-1">Productos de la venta</h5>
-                    <p class="text-muted">
-                        Escribe la cantidad de cada producto. El sistema vende primero el lote que vence antes
-                        y, cuando se agota, continúa con el siguiente.
-                    </p>
-
-                    <input
-                        type="text"
-                        id="buscar"
-                        class="form-control mb-3"
-                        placeholder="Buscar producto o marca...">
-
-                    <div id="avisoSinCantidad" class="alert alert-warning d-none">
-                        Escribe la cantidad de al menos un producto para registrar la venta.
+                    <div class="card-header text-white"
+                        style="background-color: #2c3e50;">
+                        <h5 class="mb-1">Productos de la venta</h5>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <div class="col-md-5 mt-3">
+                            <input
+                                type="text"
+                                    id="buscar"
+                                    class="form-control mb-3"
+                                    placeholder="Buscar producto">
+                        </div>
 
-                            <thead class="table-light">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+
+                            <thead class="table-dark"
+                                style="--bs-table-bg: #2c3e50; --bs-table-color: #ffffff;">
                                 <tr>
                                     <th>Producto</th>
                                     <th>Existencias</th>
-                                    <th>Sale primero</th>
-                                    <th>Precio de venta</th>
+                                    <th class="text-end" style="width: 140px;">Precio</th>
                                     <th style="width: 140px;">Cantidad</th>
                                 </tr>
                             </thead>
@@ -74,32 +78,30 @@
                                     <tr class="fila-producto">
 
                                         <td>
-                                            {{ $producto->nombre }}
-                                            <small class="text-muted d-block">
+                                            <div class="fw-semibold">{{ $producto->nombre }}</div>
+                                            <small class="text-muted">
                                                 {{ $producto->presentacion }}@if ($producto->marca) · {{ $producto->marca }}@endif
                                             </small>
                                         </td>
 
                                         <td>
-                                            {{ $producto->stock_vigente }}
-                                            @if ($producto->lotes->count() > 1)
-                                                <small class="text-muted d-block">
-                                                    en {{ $producto->lotes->count() }} lotes
-                                                </small>
-                                            @endif
-                                        </td>
-
-                                        <td>
-                                            Lote {{ $primerLote->numero_lote ?? 'sin número' }}
-                                            <small class="d-block text-muted">
-                                                Vence {{ $primerLote->fecha_vencimiento->format('d/m/Y') }}
+                                            <div class="fw-semibold">
+                                                {{ $producto->stock_vigente }}
+                                                @if ($producto->lotes->count() > 1)
+                                                    <small class="text-muted fw-normal">
+                                                        en {{ $producto->lotes->count() }} lotes
+                                                    </small>
+                                                @endif
+                                            </div>
+                                            <small class="text-muted">
+                                                · vence {{ $primerLote->fecha_vencimiento->format('d/m/Y') }}
                                             </small>
-                                            @if ($primerLote->fecha_vencimiento->lte(now()->addDays(90)))
-                                                <span class="badge bg-warning text-dark">Por vencer</span>
+                                            @if ($primerLote->fecha_vencimiento->lte(now()->addDays(30)))
+                                                <span class="badge bg-warning text-dark ms-1">Por vencer</span>
                                             @endif
                                         </td>
 
-                                        <td>
+                                        <td class="text-end text-nowrap">
                                             Q {{ number_format($producto->precio_venta, 2) }}
                                         </td>
 
@@ -110,9 +112,10 @@
                                                 class="form-control cantidad-input"
                                                 min="0"
                                                 max="{{ $producto->stock_vigente }}"
+                                                placeholder="0"
                                                 data-precio="{{ $producto->precio_venta }}"
                                                 data-nombre="{{ $producto->nombre }} - {{ $producto->presentacion }}"
-                                                value="{{ old('productos.' . $producto->id, 0) }}">
+                                                value="{{ old('productos.' . $producto->id) }}">
                                         </td>
 
                                     </tr>
@@ -122,12 +125,24 @@
                         </table>
                     </div>
 
-                    <div class="text-end mt-3">
-                        <h5>Total: Q <span id="total">0.00</span></h5>
+                    <div class="sticky-resumen bg-white border-top pt-3 pb-2 mt-3">
 
-                        <button type="button" id="btn-guardar" class="btn btn-primary">
-                            Registrar venta
-                        </button>
+                        <div id="avisoSinCantidad" class="alert alert-warning py-2 d-none">
+                            Escribe la cantidad de al menos un producto para registrar la venta.
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <span class="text-muted">
+                                    Productos en la venta: <strong id="cantidadItems">0</strong>
+                                </span>
+                                <h5 class="mb-0">Total: Q <span id="total">0.00</span></h5>
+                            </div>
+
+                            <button type="button" id="btn-guardar" class="btn btn-primary btn-lg">
+                                Registrar venta
+                            </button>
+                        </div>
                     </div>
 
                 </form>
@@ -139,7 +154,6 @@
 
 </div>
 
-{{-- Ventana de confirmación --}}
 <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-labelledby="modalConfirmarTitulo" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -185,7 +199,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form-venta');
 
-    // Si no hay formulario (no hay productos), no hay nada que configurar
     if (!form) {
         return;
     }
@@ -194,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filas = document.querySelectorAll('.fila-producto');
     const inputs = document.querySelectorAll('.cantidad-input');
     const totalEl = document.getElementById('total');
+    const itemsEl = document.getElementById('cantidadItems');
     const btnGuardar = document.getElementById('btn-guardar');
     const btnConfirmar = document.getElementById('btn-confirmar');
     const aviso = document.getElementById('avisoSinCantidad');
@@ -205,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ? new bootstrap.Modal(modalEl)
         : null;
 
-    // Filtro de búsqueda
     buscar.addEventListener('input', () => {
         const q = buscar.value.toLowerCase();
         filas.forEach(fila => {
@@ -213,19 +226,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Total estimado (el total real lo calcula el servidor)
     function calcularTotal() {
         let total = 0;
+        let items = 0;
+
         inputs.forEach(input => {
-            total += (parseInt(input.value) || 0) * parseFloat(input.dataset.precio);
+            const cantidad = parseInt(input.value) || 0;
+
+            total += cantidad * parseFloat(input.dataset.precio);
+
+            if (cantidad > 0) {
+                items++;
+            }
+
+            input.closest('tr').classList.toggle('table-success', cantidad > 0);
         });
+
         totalEl.textContent = total.toFixed(2);
+        itemsEl.textContent = items;
+
+        if (items > 0) {
+            aviso.classList.add('d-none');
+        }
     }
 
-    inputs.forEach(input => input.addEventListener('input', calcularTotal));
+    inputs.forEach(input => {
+        input.addEventListener('input', calcularTotal);
+
+        input.addEventListener('focus', () => input.select());
+    });
+
     calcularTotal();
 
-    // Que la tecla Enter no envíe el formulario por accidente
     form.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
             e.preventDefault();
@@ -257,9 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.submit();
     }
 
-    // Al presionar "Registrar venta" se muestra la confirmación
     btnGuardar.addEventListener('click', () => {
-        // Respeta los min/max de los campos
         if (!form.reportValidity()) {
             return;
         }
@@ -273,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         aviso.classList.add('d-none');
 
-        // Armar el resumen (textContent evita problemas con caracteres especiales)
         resumen.innerHTML = '';
         let total = 0;
 
@@ -302,7 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) {
             modal.show();
         } else if (confirm('¿Registrar la venta por Q ' + total.toFixed(2) + '?')) {
-            // Respaldo si Bootstrap JS no está cargado
             enviarVenta();
         }
     });

@@ -6,7 +6,8 @@
         <div class="col-lg-10">
             <div class="card shadow-sm border-0">
 
-                <div class="card-header bg-warning text-dark d-flex align-items-center justify-content-between">
+                <div class="card-header text-white"
+                    style="background-color: #2c3e50;">
                     <h4 class="mb-0">
                         Editar Producto
                     </h4>
@@ -56,6 +57,9 @@
                                        class="form-control"
                                        value="{{ old('codigo_barra', $producto->codigo_barra) }}"
                                        placeholder="Ej: 7501234567890">
+                                @error('codigo_barra')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-4">
@@ -80,8 +84,7 @@
                                        id="marca"
                                        name="marca"
                                        class="form-control @error('marca') is-invalid @enderror"
-                                       value="{{ old('marca', $producto->marca) }}"
-                                       placeholder="Ej: Genomma Lab">
+                                       value="{{ old('marca', $producto->marca) }}">
                                 @error('marca')
                                     <div class="invalid-feedback">
                                         {{ $message }}
@@ -126,30 +129,26 @@
                                         name="forma_venta"
                                         class="form-select"
                                         required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="Unidad"    {{ old('forma_venta', $producto->forma_venta) == 'Unidad' ? 'selected' : '' }}>Unidad</option>
-                                    <option value="Caja"      {{ old('forma_venta', $producto->forma_venta) == 'Caja' ? 'selected' : '' }}>Caja</option>
-                                    <option value="Blíster"   {{ old('forma_venta', $producto->forma_venta) == 'Blíster' ? 'selected' : '' }}>Blíster</option>
-                                    <option value="Frasco"    {{ old('forma_venta', $producto->forma_venta) == 'Frasco' ? 'selected' : '' }}>Frasco</option>
+                                        <option value="">Seleccionar</option>
+                                        @foreach (\App\Models\Producto::FORMAS_VENTA as $forma)
+                                            <option value="{{ $forma }}"
+                                                @selected(old('forma_venta', $producto->forma_venta) == $forma)>
+                                                {{ $forma }}
+                                            </option>
+                                        @endforeach
                                 </select>
                             </div>
-                        </div>
 
-                        <div class="row g-3">
                             <div class="col-md-4">
-                                <label for="precio_compra" class="form-label">Precio de compra <span class="text-danger">*</span></label>
+                                <label class="form-label">Precio de compra</label>
                                 <div class="input-group">
                                     <span class="input-group-text">Q</span>
-                                    <input type="number"
-                                           id="precio_compra"
-                                           name="precio_compra"
-                                           step="0.01"
-                                           min="0"
-                                           class="form-control @error('precio_compra') is-invalid @enderror"
-                                           value="{{ old('precio_compra', $producto->precio_compra) }}"
-                                           required>
+                                    <input type="text"
+                                        class="form-control"
+                                        value="{{ number_format($producto->precio_compra, 2)}}"
+                                        disabled>
                                 </div>
-                            </div>
+                            </div>  
 
                             <div class="col-md-4">
                                 <label for="precio_venta" class="form-label">Precio de venta <span class="text-danger">*</span></label>
@@ -164,7 +163,10 @@
                                            value="{{ old('precio_venta', $producto->precio_venta) }}"
                                            required>
                                 </div>
-                            </div>
+                                @error('precio_venta')
+                                    <div class="text-danger small">{{$message}}</div>
+                                    @enderror
+                                </div>
 
                             <div class="col-md-4">
                                 <label for="stock_minimo" class="form-label">Stock mínimo <span class="text-danger">*</span></label>
@@ -182,9 +184,7 @@
                                         </div>
                                        @enderror
                             </div>
-                        </div>
 
-                        <div class="row g-3">
                             <div class="col-md-4">
                                 <label for="estado" class="form-label">Estado <span class="text-danger">*</span></label>
                                 <select id="estado"
@@ -200,6 +200,8 @@
                             </div>
                         </div>
 
+                        <div class="d-flex gap-2 mt-3">
+
                         <button class="btn btn-warning">
                         Actualizar
                         </button>
@@ -208,7 +210,7 @@
                         class="btn btn-secondary">
                         Volver
                         </a>
-
+                        </div>
 
                     </form>
                 </div>

@@ -15,10 +15,13 @@ Route::get('/', [DashboardController::class, 'index'])
     ->middleware('auth');
     
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.authenticate');
+Route::post('/login', [AuthController::class, 'login'])
+->name('login.authenticate')
+->middleware('throttle:5,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function (){
+
     Route::get('/reportes/inventario', [ReporteController::class, 'inventario'])
     ->name('reportes.inventario');
 
@@ -40,7 +43,7 @@ Route::middleware('auth')->group(function (){
         ->middleware('propietaria');
     
     Route::resource('compras', CompraController::class)
-        ->except(['index','show'])
+        ->only(['create', 'store'])
         ->middleware('propietaria');
     Route::resource('compras', CompraController::class)
         ->only (['index','show']);
@@ -51,8 +54,15 @@ Route::middleware('auth')->group(function (){
     Route::post('/ventas/{venta}/anular', [VentaController::class, 'anular'])
         ->name('ventas.anular');
 
-    Route::resource('usuarios', UsuarioController::class)
-        ->middleware('propietaria');
+    Route::middleware('propietaria')->group(function () {
+        Route::resource('usuarios', UsuarioController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update']);
 
+        Route::put('/usuarios/{usuario}/password', [UsuarioController::class, 'cambiarPassword'])
+            ->name('usuarios.password');
+
+        Route::patch('/usuarios/{usuario}/estado', [UsuarioController::class, 'cambiarEstado'])
+            ->name('usuarios.estado');
+    });
     
 });

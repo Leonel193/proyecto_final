@@ -21,11 +21,11 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credenciales)) {
+        if (Auth::attempt($credenciales + ['activo' => true ])) {
 
             $request->session()->regenerate();
 
-            return redirect()->route('productos.index');
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([

@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('forma_venta', 50);
             $table->string('principio_activo', 150)->nullable();
             $table->string('codigo_barra', 100)->nullable()->unique();
-            $table->decimal('precio_compra', 10, 2);
-            $table->decimal('precio_venta', 10, 2);
+            $table->decimal('precio_compra', 10, 2)->default(0);
+            $table->decimal('precio_venta', 10, 2)->default(0);
             $table->unsignedInteger('stock_minimo')->default(5);
             $table->string('categoria', 100);
             $table->boolean('estado')->default(true);
