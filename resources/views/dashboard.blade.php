@@ -88,16 +88,6 @@
 
     </div>
 
-    <div class="card shadow-sm border-0 mt-4">
-        <div class="card-body">
-            <h5>Bienvenido al sistema de Farmacia Nazareth</h5>
-            <p class="text-muted mb-0">
-                Desde este panel puedes consultar el estado general
-                del inventario y acceder a los módulos del sistema.
-            </p>
-        </div>
-    </div>
-
 </div>
 
 @endsection

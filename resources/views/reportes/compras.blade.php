@@ -18,7 +18,7 @@
             </a>
 
         <button onclick="window.print()" class="btn btn-primary">
-            Imprimir / Guardar PDF
+            Guardar PDF
         </button>
         </div>
     </div>

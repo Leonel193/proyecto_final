@@ -42,7 +42,9 @@ class DashboardController extends Controller
             return ($producto->unidades_vencidas ?? 0) > 0;
         })->count();
 
-        $ventasHoy = Venta::whereDate('fecha_venta', today())->count();
+        $ventasHoy = Venta::completadas()
+            ->whereDate('fecha_venta', today())
+            ->count();
 
         return view('dashboard', compact(
             'totalProductos',

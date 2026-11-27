@@ -25,7 +25,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="nombre" class="form-label">
-                            Nombre del producto *
+                            Nombre del producto 
                         </label>
                         <input type="text" name="nombre" id="nombre"
                             class="form-control @error('nombre') is-invalid @enderror"
@@ -39,7 +39,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="presentacion" class="form-label">
-                            Presentación *
+                            Presentación 
                         </label>
                         <input type="text" name="presentacion"
                             id="presentacion" class="form-control @error('presentacion') is-invalid @enderror"
@@ -65,7 +65,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="forma_venta" class="form-label">
-                            Forma de venta *
+                            Forma de venta 
                         </label>
                         <select name="forma_venta" id="forma_venta"
                             class="form-select @error('forma_venta') is-invalid @enderror" required>
@@ -117,7 +117,7 @@
 
                         <div class="col-md-4 mb-3">
                             <label for="stock_minimo" class="form-label">
-                                Stock mínimo *
+                                Stock mínimo 
                             </label>
                             <input type="number" name="stock_minimo"
                                 id="stock_minimo" class="form-control @error('stock_minimo') is-invalid @enderror   "
@@ -127,7 +127,7 @@
 
                         <div class="col-md-4 mb-3">
                             <label for="categoria" class="form-label">
-                                Categoría *
+                                Categoría 
                             </label>
                             <input type="text" name="categoria" id="categoria"
                                 class="form-control @error('categoria') is-invalid @enderror" value="{{ old('categoria') }}"
@@ -135,7 +135,7 @@
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label for="estado" class="form-label">Estado *</label>
+                            <label for="estado" class="form-label">Estado </label>
                             <select name="estado" id="estado"
                                 class="form-select @error('estado') is-invalid @enderror" required>
                                 <option value="1"

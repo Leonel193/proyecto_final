@@ -99,8 +99,8 @@ class VentaController extends Controller
                     }
 
                     if ($producto->precio_venta <= 0) {
-                        throw ValidationException::WithMessages([
-                            'productos' => 'El producto ' . $producto->nombre . 'aún no tiene precio de venta.',
+                        throw ValidationException::withMessages([
+                            'productos' => 'El producto ' . $producto->nombre . ' aún no tiene precio de venta.',
                         ]);
                     }
 

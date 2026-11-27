@@ -50,12 +50,13 @@
                         <h5 class="mb-1">Productos de la venta</h5>
                     </div>
 
-                        <div class="col-md-5 mt-3">
+                        <div class="row mb-3 mt-3">
                             <input
                                 type="text"
-                                    id="buscar"
-                                    class="form-control mb-3"
-                                    placeholder="Buscar producto">
+                                id="buscar"
+                                class="form-control"
+                                placeholder="Buscar producto"
+                                autocomplete="off">
                         </div>
 
                     <div class="table-responsive">
@@ -75,11 +76,12 @@
                                 @foreach ($productos as $producto)
                                     @php $primerLote = $producto->lotes->first(); @endphp
 
-                                    <tr class="fila-producto">
+                                    <tr class="fila-producto"
+                                    data-buscar="{{ \Illuminate\Support\Str::lower($producto->nombre . ' ' . $producto->marca . ' ' . $producto->principio_activo . ' ' . $producto->codigo_barra) }}">
 
                                         <td>
                                             <div class="fw-semibold">{{ $producto->nombre }}</div>
-                                            <small class="text-muted">
+                                            <small class="text-muted d-block">
                                                 {{ $producto->presentacion }}@if ($producto->marca) · {{ $producto->marca }}@endif
                                             </small>
                                         </td>
@@ -222,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buscar.addEventListener('input', () => {
         const q = buscar.value.toLowerCase();
         filas.forEach(fila => {
-            fila.style.display = fila.textContent.toLowerCase().includes(q) ? '' : 'none';
+            fila.style.display = fila.dataset.buscar.includes(q) ? '' : 'none';
         });
     });
 

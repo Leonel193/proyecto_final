@@ -127,7 +127,6 @@
 
 </div>
 
-{{-- Buscador en vivo --}}
 <div class="row mb-4">
     <div class="col-md-8 col-lg-6">
         <label for="buscar" class="form-label">Buscar producto</label>
@@ -136,7 +135,7 @@
                 type="text"
                 id="buscar"
                 class="form-control"
-                placeholder="Nombre, marca, principio activo, código de barras o estado..."
+                placeholder="Buscar"
                 autocomplete="off">
             <button type="button" id="btn-limpiar" class="btn btn-secondary">
                 Limpiar
@@ -207,11 +206,12 @@
                             } elseif ($porVencer > 0 && $porVencer >= $buenas) {
                                 $estadoClave = 'por_vencer';
                             } else {
-                                $estadoClave = 'disponible';
+                                $estadoClave = $stockBajo ? 'stock_bajo': 'disponible';
                             }
 
                             $estados = [
                                 'disponible' => ['Disponible', 'success'],
+                                'stock_bajo' => ['Stock bajo', 'danger'],
                                 'por_vencer' => ['Próximo a vencer', 'warning'],
                                 'vencido'    => ['Vencido', 'danger'],
                                 'sin_stock'  => ['Sin existencias', 'secondary'],

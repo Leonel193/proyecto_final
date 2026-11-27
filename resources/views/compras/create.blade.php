@@ -45,17 +45,6 @@
                     <div class="col-md-6 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label for="proveedor_id" class="form-label mb-0">Proveedor</label>
-
-                            <div class="d-flex gap-2">
-                                <a href="{{ route('proveedores.create') }}"
-                                   class="btn btn-primary">
-                                    Nuevo proveedor
-                                </a>
-                                <button type="button" id="actualizarProveedores"
-                                        class="btn btn-secondary">
-                                    Actualizar lista
-                                </button>
-                            </div>
                         </div>
 
                         <select name="proveedor_id" id="proveedor_id" class="form-select" required>
